@@ -1,10 +1,10 @@
-from src.config.config import OHLC_MA_RS_PATH
 from src.data.get_from_local import get_ohlc_from_txt
 from src.data.preprocessing import (
     add_50_150_200_ma,
     add_rs_percentiles_by_date,
     add_rs_vs_qqq,
 )
+from src.utils.config import OHLC_MA_RS_PATH
 from src.utils.date import get_today_as_string
 
 

@@ -116,7 +116,6 @@ def get_ohlc_all_from_web(days=30, interval="day"):
 
 
 def main():
-    # get_ixic_index_from_web(days=3)
     write_tickerslist()
     get_ohlc_all_from_web(days=900)
 

@@ -1,3 +1,5 @@
+import pandas as pd
+
 from src.data.get_from_local import get_ohlc_from_txt
 from src.data.preprocessing import (
     add_50_150_200_ma,
@@ -6,6 +8,15 @@ from src.data.preprocessing import (
 )
 from src.utils.config import OHLC_MA_RS_PATH
 from src.utils.date import get_today_as_string
+from pathlib import Path
+
+def get_ohlc_ma_rs_for_analysis(ticker=None) -> pd.DataFrame:
+    file_path: Path = OHLC_MA_RS_PATH / "2025-09-26.parquet"
+    df = pd.read_parquet(file_path, engine="pyarrow")
+    if ticker:
+        return df.loc[df["T"] == ticker]
+    else :
+        return df
 
 
 def save_ohlc_ma_rs_parquet() -> None:

@@ -57,7 +57,7 @@ def add_rs_vs_qqq(
     return out
 
 
-def add_rs_percentiles_by_date(df_rs, periods=(50, 150, 200), exclude=("QQQ",)):
+def add_rs_percentiles_by_date(df_rs, periods=(50, 150, 200), exclude=("QQQ",)) -> pd.DataFrame:
     out = df_rs[~df_rs["T"].isin(exclude)].copy()
 
     # 날짜별 퍼센타일(0~1)
@@ -71,6 +71,21 @@ def add_rs_percentiles_by_date(df_rs, periods=(50, 150, 200), exclude=("QQQ",)):
     out["RS_pct_mean"] = out[cols].mean(axis=1)
 
     return out
+
+
+def add_52w_high_52w_low(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.sort_values(["T", df.index.name or "date"]).copy()
+    df["52w_high"] = df.groupby("T")["c"].transform(
+            lambda s: s.rolling(252).max())
+    df["52w_low"] = df.groupby("T")["c"].transform(
+            lambda s: s.rolling(252).min())
+    return df
+    
+
+def add_is_ma200_up(df: pd.DataFrame, period=20) -> pd.DataFrame:
+    df["is_ma200_up"] = df["ma200"] > df.groupby("T")["ma200"].shift(period)
+
+    return df
 
 
 def main():

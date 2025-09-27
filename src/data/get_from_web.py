@@ -40,9 +40,9 @@ def write_tickerslist():
 def _filter_common_stocks_only(df):
     whitelist = ["QQQ"]
     exclude_keywords = {
-        # "ETF",
-        # "ETN",
-        # "Fund",
+        "ETF",
+        "ETN",
+        "Fund",
         "Trust",
         "Preferred",
         "Warrant",

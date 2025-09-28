@@ -21,6 +21,7 @@ ETF_HOLDINGS_PATH = SRC_PATH / "data" / "cached" / "ETF_Holdings"
 POLYGON_OHLC_URL = "https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks"
 NASDAQURL = "ftp://ftp.nasdaqtrader.com/SymbolDirectory/nasdaqtraded.txt"
 OTHERURL = "ftp://ftp.nasdaqtrader.com/SymbolDirectory/otherlisted.txt"
+SEC_CIK_URL = "https://www.sec.gov/files/company_tickers.json"
 
 if __name__ == "__main__":
     print(POLYGON_APIKEY)

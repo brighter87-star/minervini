@@ -60,24 +60,26 @@ def parse_business_section_from_doc(url: str) -> str:
 
     text = soup.get_text(separator="\n", strip=False)
     text = text.replace("\u00A0", " ").replace("\u2002", " ")
-    text = re.sub(r"[ \t]{2,}", " ", text)
-    text = re.sub(r"\s+", " ", text)
-    text = text.strip()
+    text = re.sub(r"[ \t]{1,}", " ", text)
+    text = re.sub(r"\n{2,}", r"\n", text)
 
-    start_pat = re.compile(
-        r"item[\s\u00A0]*1[\s\.:–—-]*business", re.I
-    )
-    end_pat = re.compile(
-        r"item[\s\u00A0]*1a[\s\.:–—-]*|item[\s\u00A0]*2[\s\.:–—-]*", re.I
+    business_pattern: Pattern[str] = re.compile(
+    r"(\bItem\s*[0-9A-Za-z]+[\. \s]*Business\n\b)(.*\n)(.*\n)",
+    flags=re.I | re.M
     )
 
-    m_start = start_pat.search(text)
-    if not m_start:
+    extracted = business_pattern.findall(text)
+
+    if not extracted:
+        print("맞는 패턴이 없어요.")
         return None
 
-    m_end = end_pat.search(text, m_start.end())
+    print(extracted)
+    return extracted
 
-    return text[m_start.end():m_start.end()+100].strip()
+    # m_end = end_pat.search(text, m_start.end())
+
+    # return text[m_start.end():m_start.end()+100].strip()
     """
     if m_end:
         return text[m_start.end():m_end.start()].strip()
@@ -87,7 +89,7 @@ def parse_business_section_from_doc(url: str) -> str:
 
 
 def main():
-    ticker = "AAPL"
+    ticker = "QUBT"
     cik_code = get_cik_code(ticker)
     out = get_latest_filing_urls(cik=cik_code)
     text = parse_business_section_from_doc(out[0]["url"])

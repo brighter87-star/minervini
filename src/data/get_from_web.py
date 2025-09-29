@@ -2,19 +2,22 @@ import logging
 import os
 import re
 from pathlib import Path
+from urllib.parse import urljoin
 
 import pandas as pd
 import requests
 from src.data.get_from_local import get_tickerlist_from_txt
+from src.data.save_to_local import save_ticker_overviews_as_parquet
 from src.utils.config import (
     NASDAQURL,
     OHLC_PATH,
     OTHERURL,
     POLYGON_APIKEY,
     POLYGON_OHLC_URL,
+    POLYGON_TICKER_OVERVIEW_URL,
     TICKERLIST_PATH,
 )
-from src.utils.date import get_datelist
+from src.utils.date import get_datelist, get_this_month_as_string
 
 
 def _get_tickerlist_from_web(url) -> pd.DataFrame:
@@ -115,9 +118,34 @@ def get_ohlc_all_from_web(days=30, interval="day"):
     print("***********OHLC 데이터 가져오기 종료.***********")
 
 
+def _get_a_ticker_overview_from_web(ticker):
+    url = urljoin(POLYGON_TICKER_OVERVIEW_URL, f"tickers/{ticker}")
+    try:
+        return pd.DataFrame(
+            [requests.get(url, params={"apikey": POLYGON_APIKEY}).json()["results"]],
+        )
+    except Exception as e:
+        logging.exception(f"{e}: 티커 {ticker}에서 문제 발생")
+        return pd.DataFrame([])
+
+
+def get_ticker_overviews_from_web() -> pd.DataFrame:
+    tickers = get_tickerlist_from_txt()
+    df_list = []
+
+    for idx, ticker in enumerate(tickers):
+        print(f"{idx}/{len(tickers)} 진행 중...")
+        df_list.append(_get_a_ticker_overview_from_web(ticker))
+
+    dfs = pd.concat(df_list, ignore_index=True)
+    dfs["snapshot_month"] = get_this_month_as_string()
+    save_ticker_overviews_as_parquet(dfs, subdir="en")
+
+
 def main():
-    write_tickerslist()
-    get_ohlc_all_from_web(days=900)
+    # write_tickerslist()
+    # get_ohlc_all_from_web(days=900)
+    get_ticker_overviews_from_web()
 
 
 if __name__ == "__main__":

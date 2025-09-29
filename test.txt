@@ -1,0 +1,26 @@
+                                                                                0
+ticker                                                                       AAPL
+name                                                                   Apple Inc.
+market                                                                     stocks
+locale                                                                         us
+primary_exchange                                                             XNAS
+type                                                                           CS
+active                                                                       True
+currency_name                                                                 usd
+cik                                                                    0000320193
+composite_figi                                                       BBG000B9XRY4
+share_class_figi                                                     BBG001S5N8V8
+market_cap                                                        3791126029400.0
+phone_number                                                       (408) 996-1010
+address                         {'address1': 'ONE APPLE PARK WAY', 'city': 'CU...
+description                     Apple is among the largest companies in the wo...
+sic_code                                                                     3571
+sic_description                                              ELECTRONIC COMPUTERS
+ticker_root                                                                  AAPL
+homepage_url                                                https://www.apple.com
+total_employees                                                            164000
+list_date                                                              1980-12-12
+branding                        {'logo_url': 'https://api.polygon.io/v1/refere...
+share_class_shares_outstanding                                        14840390000
+weighted_shares_outstanding                                           14840390000
+round_lot                                                                     100

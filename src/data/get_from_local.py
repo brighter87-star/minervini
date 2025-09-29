@@ -1,9 +1,12 @@
 import logging
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
-from src.utils.config import OHLC_PATH, TICKERLIST_PATH
-from src.utils.date import get_datelist
+from src.data.save_to_local import save_ticker_overviews_as_parquet
+from src.utils.config import OHLC_PATH, TICKER_OVERVIEW_PATH, TICKERLIST_PATH
+from src.utils.date import get_datelist, get_this_month_as_string
+from src.utils.translate import translate_txt_papago
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +36,26 @@ def get_ohlc_from_txt(days=200) -> pd.DataFrame:
     return pd.concat(ohlclist, ignore_index=False)
 
 
+def _read_ticker_overviews_from_local(lang: Literal["ko", "en"]):
+    """lang에 따라 description 부분이 영어로 되어있거나 파파고 한글 번역된 data를 얻음
+    lang = "en" or "ko"
+    """
+    this_month = pd.Timestamp.today().strftime("%Y-%m")
+    file_path = TICKER_OVERVIEW_PATH / lang / this_month / "part-0.parquet"
+    return pd.read_parquet(file_path, engine="pyarrow")
+
+
+def add_description_ko_to_ticker_overview():
+    df = _read_ticker_overviews_from_local(lang="en")
+    df["description_ko"] = df["description"].apply(translate_txt_papago)
+    df["snapshot_month"] = get_this_month_as_string()
+    save_ticker_overviews_as_parquet(df, subdir="ko")
+
+
 def main():
-    df = get_ohlc_from_txt(days=10)
-    print(df.head(3))
+    # df = get_ohlc_from_txt(days=10)
+    ticker_overview_ko = _read_ticker_overviews_from_local(lang="ko")
+    ticker_overview_en = _read_ticker_overviews_from_local(lang="en")
 
 
 if __name__ == "__main__":

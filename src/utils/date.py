@@ -15,6 +15,10 @@ def get_today_as_string():
     return pd.Timestamp.today().strftime("%Y-%m-%d")
 
 
+def get_this_month_as_string() -> str:
+    return pd.Timestamp.today().strftime("%Y-%m")
+
+
 def _to_string_from_time(date: pd.Timestamp):
     return date.strftime("%Y-%m-%d")
 

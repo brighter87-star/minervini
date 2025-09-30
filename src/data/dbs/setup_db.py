@@ -135,7 +135,7 @@ def save_upsert(df: pd.DataFrame, *, mapping: Mapping[str, str] = None) -> int:
 
 
 def main():
-    df = get_ohlc_ma_rs_for_analysis(date="2025-09-30")
+    df = get_ohlc_ma_rs_for_analysis(date="2025-09-29")
     result_df = screen_minervini(df, rs_col="RS_200_pct")
     init_schema()
     save_upsert(result_df)

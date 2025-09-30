@@ -32,6 +32,9 @@ def screen_minervini(
             "T",
             "c",
             "v",
+            "RS_50",
+            "RS_150",
+            "RS_200",
             "RS_50_pct",
             "RS_150_pct",
             "RS_200_pct",
@@ -48,7 +51,6 @@ def screen_minervini(
 def main():
     df = get_ohlc_ma_rs_for_analysis()
     result_df = screen_minervini(df, rs_col="RS_200_pct")
-    final_df = result_df.loc[result_df["v"] > 10000000]
 
     print(final_df)
 

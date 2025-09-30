@@ -11,6 +11,7 @@ NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
 
 # File PATHs
 PROJECT_ROOT_PATH = Path(__file__).resolve().parent.parent.parent
+ENV_PATH = PROJECT_ROOT_PATH / "utils"
 SRC_PATH = PROJECT_ROOT_PATH / "src"
 CACHED_PATH = SRC_PATH / "data" / "cached"
 TICKERLIST_PATH = CACHED_PATH / "tickers"

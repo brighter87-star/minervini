@@ -81,7 +81,7 @@ def get_ohlc_all(tickers, interval="day", date="2025-09-11") -> pd.DataFrame:
 
 
 def get_ohlc_all_from_web(days=30, interval="day"):
-    """전 종목의 ohlc 데이터를 가져올 때 main에서 사용."""
+    """전 종목의 ohlc 데이터를 가져와 parquet으로 저장하는 함수. main에서 사용."""
     tickers = get_tickerlist_from_txt()
     date_list = get_datelist(days=days)
     os.makedirs(OHLC_PATH, exist_ok=True)
@@ -144,8 +144,8 @@ def get_ticker_overviews_from_web() -> pd.DataFrame:
 
 def main():
     # write_tickerslist()
-    # get_ohlc_all_from_web(days=900)
-    get_ticker_overviews_from_web()
+    get_ohlc_all_from_web(days=900)
+    # get_ticker_overviews_from_web()
 
 
 if __name__ == "__main__":

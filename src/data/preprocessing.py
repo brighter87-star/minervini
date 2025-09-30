@@ -1,17 +1,29 @@
+import inspect
+
 import numpy as np
 import pandas as pd
 from src.data.get_from_local import get_ohlc_from_txt
 
 
-def add_50_150_200_ma(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.sort_values(by=["T", "date"]).copy()
-    g = df.groupby(by=["T"])["c"]
-    for w in (50, 150, 200):
-        df[f"ma{w}"] = g.transform(
-            lambda x: x.rolling(window=w).mean(),
-        )
+class ModificationError(Exception):
+    def __init__(self, message: str):
+        frame = inspect.stack()[1]
+        func_name = frame.function
+        super().__init__(f"[{func_name}] {message}")
 
-    return df
+
+def add_50_150_200_ma(df: pd.DataFrame) -> pd.DataFrame:
+    try:
+        print("데이터프레임에 이평선을 추가하는 중...")
+        df = df.sort_values(by=["T", "date"]).copy()
+        g = df.groupby(by=["T"])["c"]
+        for w in (50, 150, 200):
+            df[f"ma{w}"] = g.transform(
+                lambda x: x.rolling(window=w).mean(),
+            )
+        return df
+    except Exception as e:
+        raise ModificationError(f"에러 발생: {e}")
 
 
 def add_rs_vs_qqq(
@@ -19,73 +31,86 @@ def add_rs_vs_qqq(
     periods=(50, 150, 200),
     idx_ticker="QQQ",
 ) -> pd.DataFrame:
-    # df: long ['T','date','c', ...]
-    out = df.sort_values(["T", "date"]).copy()
+    try:
+        print("데이터프레임에 QQQ와 비교한 RS를 계산하고 추가하는 중...")
+        out = df.sort_values(["T", "date"]).copy()
 
-    # 1) 인덱스(QQQ) 전용 DF
-    idx = (
-        out.loc[out["T"] == idx_ticker, ["date", "c"]]
-        .sort_values("date")
-        .rename(columns={"c": "idx_close"})
-    )
-    # 2) 인덱스 리턴을 "인덱스 DF에서" 먼저 계산
-    for p in periods:
-        idx[f"index_ret_{p}"] = idx["idx_close"] / idx["idx_close"].shift(p)
-
-    # 3) 인덱스 리턴만 종목 DF에 머지 (ffill/bfill 금지; 필요하면 나중에 ffill만)
-    out = out.merge(
-        idx[["date"] + [f"index_ret_{p}" for p in periods]],
-        on="date",
-        how="left",
-    )
-
-    # 4) 종목(티커별) 리턴
-    for p in periods:
-        out[f"stock_ret_{p}"] = out.groupby("T")["c"].transform(
-            lambda s, p=p: s / s.shift(p),
+        idx = (
+            out.loc[out["T"] == idx_ticker, ["date", "c"]]
+            .sort_values("date")
+            .rename(columns={"c": "idx_close"})
         )
-        # RS = 종목 / 지수
-        num = out[f"stock_ret_{p}"].to_numpy(float)
-        den = out[f"index_ret_{p}"].to_numpy(float)
-        out[f"RS_{p}"] = np.divide(
-            num,
-            den,
-            out=np.full_like(num, np.nan),
-            where=~np.isnan(den) & (den != 0),
+        for p in periods:
+            idx[f"index_ret_{p}"] = idx["idx_close"] / idx["idx_close"].shift(p)
+
+        out = out.merge(
+            idx[["date"] + [f"index_ret_{p}" for p in periods]],
+            on="date",
+            how="left",
         )
 
-    return out
+        for p in periods:
+            out[f"stock_ret_{p}"] = out.groupby("T")["c"].transform(
+                lambda s, p=p: s / s.shift(p),
+            )
+            num = out[f"stock_ret_{p}"].to_numpy(float)
+            den = out[f"index_ret_{p}"].to_numpy(float)
+            out[f"RS_{p}"] = np.divide(
+                num,
+                den,
+                out=np.full_like(num, np.nan),
+                where=~np.isnan(den) & (den != 0),
+            )
+
+        return out
+    except Exception as e:
+        raise ModificationError(f"에러 발생: {e}")
 
 
-def add_rs_percentiles_by_date(df_rs, periods=(50, 150, 200), exclude=("QQQ",)) -> pd.DataFrame:
-    out = df_rs[~df_rs["T"].isin(exclude)].copy()
+def add_rs_percentiles_by_date(
+    df_rs,
+    periods=(50, 150, 200),
+    exclude=("QQQ",),
+) -> pd.DataFrame:
 
-    # 날짜별 퍼센타일(0~1)
-    for p in periods:
-        out[f"RS_{p}_pct"] = out.groupby("date")[f"RS_{p}"].rank(pct=True)
+    try:
+        print("데이터프레임에 RS percentiles 정보를 넣는 중...")
+        out = df_rs[~df_rs["T"].isin(exclude)].copy()
 
-    cols = [f"RS_{p}_pct" for p in periods]
+        for p in periods:
+            out[f"RS_{p}_pct"] = out.groupby("date")[f"RS_{p}"].rank(pct=True)
 
-    # 행 단위 집계(여기서는 groupby 불필요)
-    out["RS_pct_min"] = out[cols].min(axis=1)
-    out["RS_pct_mean"] = out[cols].mean(axis=1)
+        cols = [f"RS_{p}_pct" for p in periods]
 
-    return out
+        out["RS_pct_min"] = out[cols].min(axis=1)
+        out["RS_pct_mean"] = out[cols].mean(axis=1)
+
+        return out
+    except Exception as e:
+        raise ModificationError(f"에러 발생: {e}")
 
 
 def add_52w_high_52w_low(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.sort_values(["T", df.index.name or "date"]).copy()
-    df["52w_high"] = df.groupby("T")["c"].transform(
-            lambda s: s.rolling(252).max())
-    df["52w_low"] = df.groupby("T")["c"].transform(
-            lambda s: s.rolling(252).min())
-    return df
-    
+
+    try:
+        print("데이터프레임에 52주 신고가와 신저가 정보를 추가하는 중...")
+        df = df.sort_values(["T", df.index.name or "date"]).copy()
+        df["52w_high"] = df.groupby("T")["c"].transform(lambda s: s.rolling(252).max())
+        df["52w_low"] = df.groupby("T")["c"].transform(lambda s: s.rolling(252).min())
+        return df
+    except Exception as e:
+        raise ModificationError(f"에러 발생: {e}")
+
 
 def add_is_ma200_up(df: pd.DataFrame, period=20) -> pd.DataFrame:
-    df["is_ma200_up"] = df["ma200"] > df.groupby("T")["ma200"].shift(period)
+    try:
+        print("데이터프레임에 MA200의 상승 여부 정보를 추가 중...")
+        df["is_ma200_up"] = df["ma200"] > df.groupby("T")["ma200"].shift(period)
 
-    return df
+        return df
+
+    except Exception as e:
+        raise ModificationError(f"에러 발생: {e}")
 
 
 def main():

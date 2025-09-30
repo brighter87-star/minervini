@@ -15,8 +15,7 @@ from src.utils.date import get_today_as_string
 
 
 def get_ohlc_ma_rs_for_analysis(date: str, ticker=None) -> pd.DataFrame:
-    """여기서 date는 OHLC_MA_RS parquet의 저장 날짜여야 함.
-    """
+    """여기서 date는 OHLC_MA_RS parquet의 저장 날짜여야 함."""
     file_path: Path = OHLC_MA_RS_PATH / f"{date}.parquet"
     df = pd.read_parquet(file_path, engine="pyarrow")
     if ticker:
@@ -24,7 +23,7 @@ def get_ohlc_ma_rs_for_analysis(date: str, ticker=None) -> pd.DataFrame:
     return df
 
 
-def save_ohlc_ma_rs_parquet() -> None:
+def save_ohlc_ma_rs_parquet(date) -> None:
     """ticker와 기간을 넘겨주면 candle 차트 및 MA를 위한 데이터프레임을 리턴함."""
     df = get_ohlc_from_txt(days=400)
     df = add_50_150_200_ma(df)
@@ -33,8 +32,7 @@ def save_ohlc_ma_rs_parquet() -> None:
     df = add_52w_high_52w_low(df)
     df = add_is_ma200_up(df)
 
-    today = get_today_as_string()
-    file_path = OHLC_MA_RS_PATH / f"{today}.parquet"
+    file_path = OHLC_MA_RS_PATH / f"{date}.parquet"
     try:
         print("추가된 OHLC 데이터를 parquet으로 저장하는 중...")
         df.to_parquet(file_path, engine="pyarrow")

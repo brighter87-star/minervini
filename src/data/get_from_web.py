@@ -91,7 +91,7 @@ def get_ohlc_all_from_web(days=30, interval="day"):
         try:
             file_path = OHLC_PATH / f"ohlc_{date}.parquet"
             if Path.exists(file_path):
-                print(f"{file_path}는 이미 존재하므로 건너뛰고 진행합니다.\n")
+                print(f"{file_path}는 이미 존재하므로 건너뛰고 진행합니다.")
                 continue
         except Exception:
             raise Exception("파일 존재 여부를 확인하는 과정에서 문제가 생겼어요.")

@@ -17,7 +17,7 @@ def get_tickerlist_from_txt() -> list:
 
 
 def get_ohlc_from_txt(days=200) -> pd.DataFrame:
-    datelist = get_datelist(days + 200)
+    datelist = get_datelist(days * 2)
     ohlclist = []
     for date in datelist:
         file_path = OHLC_PATH / f"ohlc_{date}.parquet"
@@ -27,6 +27,7 @@ def get_ohlc_from_txt(days=200) -> pd.DataFrame:
             continue
 
         try:
+            print(f"{file_path} 가져오는 중...")
             ohlclist.append(
                 pd.read_parquet(file_path, engine="pyarrow"),
             )

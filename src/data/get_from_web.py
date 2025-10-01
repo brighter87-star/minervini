@@ -144,7 +144,7 @@ def get_ticker_overviews_from_web() -> pd.DataFrame:
 
 def main():
     # write_tickerslist()
-    get_ohlc_all_from_web(days=900)
+    get_ohlc_all_from_web(days=10)
     # get_ticker_overviews_from_web()
 
 

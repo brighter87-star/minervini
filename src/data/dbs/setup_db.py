@@ -27,7 +27,7 @@ load_dotenv(ENV_PATH)
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-url = URL.create(
+TRADING_URL = URL.create(
     "mysql+pymysql",
     username=DB_USER,
     password=DB_PASSWORD,
@@ -38,7 +38,7 @@ url = URL.create(
 )
 
 ENGINE = create_engine(
-    url,
+    TRADING_URL,
     pool_pre_ping=True,
     pool_size=10,
     max_overflow=20,

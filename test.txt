@@ -1,5 +1,0 @@
-> /home/brighter87/Projects/minervini/src/data/dbs/setup_db.py(106)save_upsert()
--> if mapping:
-(Pdb) --KeyboardInterrupt--
-(Pdb) --KeyboardInterrupt--
-(Pdb) 

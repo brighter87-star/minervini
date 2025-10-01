@@ -8,15 +8,18 @@ from sqlalchemy import BIGINT, DECIMAL, Date, Index, Integer, String, UniqueCons
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 from src.data.dbs.setup_db import ENGINE
-from src.data.get_from_local import get_ohlc_from_txt
+from src.data.get_from_local import read_ticker_overviews_from_local
 
 
 class Base(DeclarativeBase):
     pass
 
 
-class OHLC_US(Base):
-    __tablename__ = "ohlc_us"
+class Ticker_Overview_US(Base):
+    """전체 수정해야 함.
+    """
+
+    __tablename__ = "ticer_overview_us"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     T: Mapped[str] = mapped_column(String(10), nullable=False)
     close_date: Mapped[date] = mapped_column(Date, nullable=True)
@@ -88,8 +91,13 @@ def save_upsert(
     return len(rows)
 
 
+def post_ohlc_from_local():
+    pass
+
+
 def main():
-    df = get_ohlc_from_txt(days=500)
+    df = read_ticker_overviews_from_local(lang="ko")
+    breakpoint()
     init_schema()
     save_upsert(df)
 

@@ -37,12 +37,11 @@ def get_ohlc_from_txt(days=200) -> pd.DataFrame:
     return pd.concat(ohlclist, ignore_index=False)
 
 
-def _read_ticker_overviews_from_local(lang: Literal["ko", "en"]):
+def read_ticker_overviews_from_local(lang: Literal["ko", "en"], folder_name="2025-09"):
     """lang에 따라 description 부분이 영어로 되어있거나 파파고 한글 번역된 data를 얻음
     lang = "en" or "ko"
     """
-    this_month = pd.Timestamp.today().strftime("%Y-%m")
-    file_path = TICKER_OVERVIEW_PATH / lang / this_month / "part-0.parquet"
+    file_path = TICKER_OVERVIEW_PATH / lang / folder_name / "part-0.parquet"
     return pd.read_parquet(file_path, engine="pyarrow")
 
 
@@ -55,8 +54,8 @@ def add_description_ko_to_ticker_overview():
 
 def main():
     # df = get_ohlc_from_txt(days=10)
-    ticker_overview_ko = _read_ticker_overviews_from_local(lang="ko")
-    ticker_overview_en = _read_ticker_overviews_from_local(lang="en")
+    ticker_overview_ko = read_ticker_overviews_from_local(lang="ko")
+    ticker_overview_en = read_ticker_overviews_from_local(lang="en")
 
 
 if __name__ == "__main__":

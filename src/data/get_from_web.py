@@ -100,8 +100,8 @@ def get_ohlc_all_from_web(days=30, interval="day"):
 
         try:
             api_call_cnt += 1
-            df = get_ohlc_all(tickers, date=date)
             last_date = date
+            df = get_ohlc_all(tickers, date=date)
         except Exception:
             raise Exception("{date}의 API call의 과정에서 문제가 생겼어요.")
 
@@ -117,7 +117,7 @@ def get_ohlc_all_from_web(days=30, interval="day"):
             print("\nAPI 제한 때문에 조금 쉬는 중이에요...")
         """
 
-    print("OHLC 데이터 가져오기 종료. 마지막 OHLC 데이터는 {last_date}입니다. ")
+    print(f"OHLC 데이터 가져오기 종료. 마지막 OHLC 데이터는 {last_date}입니다. ")
 
 
 def _get_a_ticker_overview_from_web(ticker):

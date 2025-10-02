@@ -1,50 +1,16 @@
 from __future__ import annotations
 
-import os
 from datetime import date
 
 import numpy as np
 import pandas as pd
-from dotenv import load_dotenv
-from sqlalchemy import (
-    BIGINT,
-    DECIMAL,
-    Date,
-    Index,
-    Integer,
-    String,
-    UniqueConstraint,
-    create_engine,
-)
+from sqlalchemy import BIGINT, DECIMAL, Date, Index, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.mysql import insert as mysql_insert
-from sqlalchemy.engine import URL
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from src.analysis.prepare import get_ohlc_ma_rs_for_analysis
 from src.analysis.screen_minervini import screen_minervini
-from src.utils.config import ENV_PATH
+from src.data.dbs.session import Database
 from src.utils.date import get_last_business_day
-
-load_dotenv(ENV_PATH)
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-
-TRADING_URL = URL.create(
-    "mysql+pymysql",
-    username=DB_USER,
-    password=DB_PASSWORD,
-    host="127.0.0.1",
-    port=3306,
-    database="trading",
-    query={"charset": "utf8mb4"},
-)
-
-ENGINE = create_engine(
-    TRADING_URL,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-    future=True,
-)
 
 
 class Base(DeclarativeBase):
@@ -79,7 +45,7 @@ class MinerviniScreeningResult(Base):
 
 
 def init_schema():
-    Base.metadata.create_all(ENGINE)
+    Base.metadata.create_all(Database().engine)
     print("Schema Ready!!!")
 
 
@@ -114,23 +80,27 @@ def save_upsert(df: pd.DataFrame, *, mapping: Mapping[str, str] = None) -> int:
     df["date"] = pd.to_datetime(df["date"]).dt.date
     df = df.replace({np.nan: None})
 
-    rows = (
-        df[list(mp.values())]
-        .rename(columns={v: k for k, v in mp.items()})
-        .to_dict(orient="records")
-    )
-    stmt = mysql_insert(MinerviniScreeningResult).values(rows)
+    with Database().session() as s:
+        rows = (
+            df[list(mp.values())]
+            .rename(columns={v: k for k, v in mp.items()})
+            .to_dict(orient="records")
+        )
+        stmt = mysql_insert(MinerviniScreeningResult).values(rows)
 
-    update_cols = {
-        c.name: stmt.inserted[c.name]
-        for c in MinerviniScreeningResult.__table__.columns
-        if c.name not in ("id",)
-    }
+        update_cols = {
+            c.name: stmt.inserted[c.name]
+            for c in MinerviniScreeningResult.__table__.columns
+            if c.name not in ("id",)
+        }
+        stmt = stmt.on_duplicate_key_update(**update_cols)
 
-    stmt = stmt.on_duplicate_key_update(**update_cols)
-
-    with Session(ENGINE) as s, s.begin():
-        s.execute(stmt)
+        try:
+            res = s.execute(stmt)
+            print(f"[save_upsert] 실행 OK, rowcount={getattr(res, 'rowcount', 'n/a')}")
+        except Exception as e:
+            # MySQL 에러 메시지 그대로 보고
+            raise RuntimeError(f"[save_upsert] 업서트 실행 실패: {e}") from e
 
     return len(rows)
 

@@ -1,6 +1,6 @@
 from src.analysis.prepare import get_ohlc_ma_rs_for_analysis, save_ohlc_ma_rs_parquet
 from src.analysis.screen_minervini import screen_minervini
-from src.data.dbs.setup_db import save_upsert
+from src.data.dbs.post_minervini_results import save_upsert
 from src.data.get_from_web import get_ohlc_all_from_web, write_tickerslist
 from src.utils.date import get_last_business_day
 

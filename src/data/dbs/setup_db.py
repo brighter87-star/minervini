@@ -22,6 +22,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 from src.analysis.prepare import get_ohlc_ma_rs_for_analysis
 from src.analysis.screen_minervini import screen_minervini
 from src.utils.config import ENV_PATH
+from src.utils.date import get_last_business_day
 
 load_dotenv(ENV_PATH)
 DB_USER = os.getenv("DB_USER")
@@ -135,7 +136,8 @@ def save_upsert(df: pd.DataFrame, *, mapping: Mapping[str, str] = None) -> int:
 
 
 def main():
-    df = get_ohlc_ma_rs_for_analysis(date="2025-09-29")
+    date = get_last_business_day()
+    df = get_ohlc_ma_rs_for_analysis(date=date)
     result_df = screen_minervini(df, rs_col="RS_200_pct")
     init_schema()
     save_upsert(result_df)

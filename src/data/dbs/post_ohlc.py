@@ -43,7 +43,7 @@ def save_upsert(
     df,
     *,
     mapping: Mapping[str:str] | None = None,
-    chunk_size: int = 1000,
+    chunk_size: int = 500,
 ) -> int:
     default_mapping = {
         "T": "T",
@@ -89,7 +89,7 @@ def save_upsert(
 
 
 def main():
-    df = get_ohlc_from_txt(days=500)
+    df = get_ohlc_from_txt(days=200)
     init_schema()
     save_upsert(df)
 

@@ -27,13 +27,13 @@ def get_ohlc_from_txt(days=200) -> pd.DataFrame:
             continue
 
         try:
-            print(f"{file_path} 가져오는 중...")
             ohlclist.append(
                 pd.read_parquet(file_path, engine="pyarrow"),
             )
         except Exception as e:
             logger.warning("읽기 실패: %s (%s)", file_path, e, exc_info=False)
 
+    print("txt로부터 ohjc 가져오기 성공!!")
     return pd.concat(ohlclist, ignore_index=False)
 
 
@@ -46,7 +46,10 @@ def read_ticker_overviews_from_local(lang: Literal["ko", "en"], folder_name="202
 
 
 def add_description_ko_to_ticker_overview():
-    df = _read_ticker_overviews_from_local(lang="en")
+    """
+    무작정 실행하면 안됨. 토큰을 아껴야 하기 때문에 이미 존재하는 티커의 경우 하지 않는 것을 고려
+    """
+    df = read_ticker_overviews_from_local(lang="en")
     df["description_ko"] = df["description"].apply(translate_txt_papago)
     df["snapshot_month"] = get_this_month_as_string()
     save_ticker_overviews_as_parquet(df, subdir="ko")

@@ -8,7 +8,7 @@ from src.utils.date import get_last_business_day
 def main():
     """오늘이 공휴일인지 아닌지 확인하고 공휴일이 아닌 경우에만 실행"""
     write_tickerslist()
-    get_ohlc_all_from_web(days=10)
+    get_ohlc_all_from_web(days=7)
     last_business_day = get_last_business_day(as_string=True)
     save_ohlc_ma_rs_parquet(date=last_business_day)
     df = get_ohlc_ma_rs_for_analysis(date=last_business_day)

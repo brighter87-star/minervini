@@ -27,6 +27,7 @@ def _get_tickerlist_from_web(url) -> pd.DataFrame:
 
 
 def write_tickerslist():
+    print("Tickerlist 가져오는 중")
     N_df = _get_tickerlist_from_web(NASDAQURL)
     O_df = _get_tickerlist_from_web(OTHERURL)
     N_filtered_df = _filter_common_stocks_only(N_df)
@@ -86,22 +87,23 @@ def get_ohlc_all_from_web(days=30, interval="day"):
     date_list = get_datelist(days=days)
     os.makedirs(OHLC_PATH, exist_ok=True)
     api_call_cnt = 0
+    last_date = ""
 
     for idx, date in enumerate(date_list):
         try:
             file_path = OHLC_PATH / f"ohlc_{date}.parquet"
             if Path.exists(file_path):
-                print(f"{file_path}는 이미 존재하므로 건너뛰고 진행합니다.")
+                # "{file_path}는 이미 존재하므로 건너뛰고 진행."
                 continue
         except Exception:
             raise Exception("파일 존재 여부를 확인하는 과정에서 문제가 생겼어요.")
 
         try:
-            print(f"{date}의 데이터를 얻어옵니다.{idx+1}/{len(date_list)}")
             api_call_cnt += 1
             df = get_ohlc_all(tickers, date=date)
+            last_date = date
         except Exception:
-            raise Exception("API call의 과정에서 문제가 생겼어요.")
+            raise Exception("{date}의 API call의 과정에서 문제가 생겼어요.")
 
         if df is not None:
             df["date"] = pd.to_datetime(date)
@@ -115,7 +117,7 @@ def get_ohlc_all_from_web(days=30, interval="day"):
             print("\nAPI 제한 때문에 조금 쉬는 중이에요...")
         """
 
-    print("***********OHLC 데이터 가져오기 종료.***********")
+    print("OHLC 데이터 가져오기 종료. 마지막 OHLC 데이터는 {last_date}입니다. ")
 
 
 def _get_a_ticker_overview_from_web(ticker):

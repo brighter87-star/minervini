@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import BIGINT, DECIMAL, Date, Index, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.mysql import insert as mysql_insert
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
-from src.data.dbs.setup_db import ENGINE
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from src.data.dbs.session import Database
 from src.data.get_from_local import get_ohlc_from_txt
 
 
@@ -35,7 +35,7 @@ class OHLC_US(Base):
 
 
 def init_schema():
-    Base.metadata.create_all(ENGINE)
+    Base.metadata.create_all(Database().engine)
     print("Schema is Ready!!!")
 
 
@@ -71,7 +71,7 @@ def save_upsert(
         .to_dict(orient="records")
     )
 
-    with Session(ENGINE) as s, s.begin():
+    with Database().session() as s:
         for i in range(0, len(rows), chunk_size):
             batch = rows[i : i + chunk_size]
             stmt = mysql_insert(OHLC_US).values(batch)

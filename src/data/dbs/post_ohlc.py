@@ -70,20 +70,24 @@ def save_upsert(
         .rename(columns={v: k for k, v in mp.items()})
         .to_dict(orient="records")
     )
+    for i in range(0, len(rows), chunk_size):
+        batch = rows[i : i + chunk_size]
+        stmt = mysql_insert(OHLC_US).values(batch)
+
+        update_cols = {
+            c.name: stmt.inserted[c.name]
+            for c in OHLC_US.__table__.columns
+            if c.name not in ("id",)
+        }
+        stmt = stmt.on_duplicate_key_update(**update_cols)
 
     with Database().session() as s:
-        for i in range(0, len(rows), chunk_size):
-            batch = rows[i : i + chunk_size]
-            stmt = mysql_insert(OHLC_US).values(batch)
-
-            update_cols = {
-                c.name: stmt.inserted[c.name]
-                for c in OHLC_US.__table__.columns
-                if c.name not in ("id",)
-            }
-            stmt = stmt.on_duplicate_key_update(**update_cols)
-
-            s.execute(stmt)
+        try:
+            res = s.execute(stmt)
+            print(f"[save_upsert] 실행 OK, rowcount={getattr(res, 'rowcount', 'n/a')}")
+        except Exception as e:
+            # MySQL 에러 메시지 그대로 보고
+            raise RuntimeError(f"[save_upsert] 업서트 실행 실패: {e}") from e
 
     return len(rows)
 

@@ -21,6 +21,7 @@ TICKER_OVERVIEW_PATH = CACHED_PATH / "ticker_overview"
 CSV_ARK_PATH = SRC_PATH / "data" / "cached" / "etf_csv_ark"
 CSV_ISHARES_PATH = SRC_PATH / "data" / "cached" / "etf_csv_ishares"
 ETF_HOLDINGS_PATH = SRC_PATH / "data" / "cached" / "ETF_Holdings"
+TRADES_PATH = SRC_PATH / "data" / "cached" / "trades"
 
 # URLs
 POLYGON_OHLC_URL = "https://api.polygon.io/v2/aggs/grouped/locale/us/market/stocks"

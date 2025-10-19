@@ -4,7 +4,12 @@ from typing import Literal
 
 import pandas as pd
 from src.data.save_to_local import save_ticker_overviews_as_parquet
-from src.utils.config import OHLC_PATH, TICKER_OVERVIEW_PATH, TICKERLIST_PATH
+from src.utils.config import (
+    OHLC_PATH,
+    TICKER_OVERVIEW_PATH,
+    TICKERLIST_PATH,
+    TRADES_PATH,
+)
 from src.utils.date import get_datelist, get_this_month_as_string
 from src.utils.translate import translate_txt_papago
 
@@ -46,8 +51,7 @@ def read_ticker_overviews_from_local(lang: Literal["ko", "en"], folder_name="202
 
 
 def add_description_ko_to_ticker_overview():
-    """무작정 실행하면 안됨. 토큰을 아껴야 하기 때문에 이미 존재하는 티커의 경우 하지 않는 것을 고려
-    """
+    """무작정 실행하면 안됨. 토큰을 아껴야 하기 때문에 이미 존재하는 티커의 경우 하지 않는 것을 고려"""
     df = read_ticker_overviews_from_local(lang="en")
     df["description_ko"] = df["description"].apply(translate_txt_papago)
     df["snapshot_month"] = get_this_month_as_string()
@@ -55,9 +59,7 @@ def add_description_ko_to_ticker_overview():
 
 
 def main():
-    # df = get_ohlc_from_txt(days=10)
-    ticker_overview_ko = read_ticker_overviews_from_local(lang="ko")
-    ticker_overview_en = read_ticker_overviews_from_local(lang="en")
+    pass
 
 
 if __name__ == "__main__":
